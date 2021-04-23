@@ -25,7 +25,7 @@ SECRET_KEY = '47uqb3dr3bw%7!t(@@516-)y1@hfflotuwrh1yv+1a)rst82at'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['moviesapp123.herokuapp', '127.0.0.1']
+ALLOWED_HOSTS = ['moviesapp123.herokuapp.com', '127.0.0.1']
 
 
 # Application definition
@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'movie'
+    'movie.apps.MovieConfig',
 ]
 
 MIDDLEWARE = [
