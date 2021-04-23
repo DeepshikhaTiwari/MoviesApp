@@ -1,6 +1,11 @@
-from django.shortcuts import render
+from django.db import transaction
+from django.shortcuts import render, redirect, get_object_or_404
+from django.template import response
+from django.urls import reverse_lazy
+
+from .forms import MovieForm, DirectorForm, StudioForm
 from .models import director, Genre, Movie, studio
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, DetailView, CreateView, DeleteView
 
 
 def index(request):
@@ -9,17 +14,41 @@ def index(request):
 
 class MovieList(ListView):
     model = Movie
-    template_name = "movie_list"
-    context_object_name = "movies"
 
 
 class MovieDetail(DetailView):
     model = Movie
 
 
-class MovieCreate(CreateView):
+@transaction.atomic
+def create_movie(request):
+    form = MovieForm(request.POST or None)
+    if form.is_valid():
+        obj = form.save()
+        return redirect('movie-detail', obj.pk)
+
+    context = {
+        'form': form
+    }
+    return render(request, context=context, template_name='movie/movie_form.html')
+
+
+def update_movie(request, pk):
+    movie = Movie.objects.get(id=pk)
+    form = MovieForm(request.POST or None, instance=movie)
+    if form.is_valid():
+        obj = form.save()
+        return redirect('movie-detail', obj.pk)
+
+    context = {
+        'form': form
+    }
+    return render(request, template_name='movie/movie_form.html', context=context)
+
+
+class MovieDelete(DeleteView):
     model = Movie
-    fields = ['title', 'slug', 'directors', 'studio', 'genre', 'movie_url', 'img_url', 'asin']
+    success_url = reverse_lazy('movies')
 
 
 class DirectorList(ListView):
@@ -32,9 +61,16 @@ class DirectorDetail(DetailView):
     model = director
 
 
-class DirectorCreate(CreateView):
-    model = director
-    fields = ['name', 'phone_no', 'dob', 'website', 'profile_url', 'gender']
+def create_director(request):
+    form = DirectorForm(request.POST or None)
+    if form.is_valid():
+        obj = form.save()
+        return redirect('director-detail', obj.pk)
+
+    context = {
+        'form': form
+    }
+    return render(request, template_name='movie/director_form.html', context=context)
 
 
 class StudioList(ListView):
@@ -46,9 +82,16 @@ class StudioDetail(DetailView):
     model = studio
 
 
-class StudioCreate(CreateView):
-    model = studio
-    fields = ['title', 'website', 'slug']
+def create_studio(request):
+    form = StudioForm(request.POST or None)
+    if form.is_valid():
+        obj = form.save()
+        return redirect('studio-detail', obj.pk)
+
+    context = {
+        'form': form
+    }
+    return render(request, template_name='movie/studio_form.html', context=context)
 
 
 class GenreList(ListView):
